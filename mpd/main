@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+from mpd import MPDClient
+
+def getvolume(c):
+	return c.status()['volume']
+
+client = MPDClient()
+client.timeout = 10
+client.idletimeout = None
+client.connect("mpd", 6600)
+print(client.mpd_version)
+
+volume = getvolume(client)
+
+while True:
+	client.idle('mixer')
+	print(getvolume(client))
+	new_volume = getvolume(client)
+	if new_volume == "100":
+		client.setvol(volume)
+	else:
+		volume = new_volume
+
