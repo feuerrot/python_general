@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+# Converts a list of hosts to my usual config snippet
+# Usage: host_to_config [host1 fqdn] ([host2 fqdn] (…))
+import socket
+import sys
+
+template = """
+++ {t_short}
+title = {t_fqdn} IPv4
+menu = {t_short} IPv4
+probe = FPing
+host = {t_fqdn}"""
+template_v6 = """
+++ {t_short}_v6
+title = {t_fqdn} IPv6
+menu = {t_short} IPv6
+probe = FPing6
+host = {t_fqdn}"""
+
+if len(sys.argv) == 1:
+	print("Usage: host_to_config [host1 fqdn] ([host2 fqdn] (…))")
+	exit(0)
+
+for fqdn in sys.argv[1:]:
+	ai = socket.getaddrinfo(fqdn, 80)
+	for elem in ai:
+		if socket.AddressFamily.AF_INET in elem:
+			print(template.format(t_fqdn = fqdn, t_short = fqdn.split('.')[0]))
+			break
+	for elem in ai:
+		if socket.AddressFamily.AF_INET6 in elem:
+			print(template_v6.format(t_fqdn = fqdn, t_short = fqdn.split('.')[0]))
+			break
