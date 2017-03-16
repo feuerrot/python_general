@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+import requests
+import re
+import os
+from bs4 import BeautifulSoup
+
+login = {
+	'username':	None,
+	'password':	None
+}
+
+url = {
+	'login':	'https://www.sbroker.de/sbl/service/anmelden',
+	'depot':	'https://www.sbroker.de/sbl/uebungsdepot/depot_standard',
+	'depot_e':	'https://www.sbroker.de/sbl/uebungsdepot/depot_erweitert'
+}
+
+parser = {
+	'value':	'Gesamtwert:',
+	'buy_value':	'Gesamtkaufwert:',
+	'delta_1d':	'Diff. abs. Vortag:'
+}
+
+with open("{}/config".format(os.path.dirname(os.path.realpath(__file__))), 'r') as configfile:
+	login.update({
+		'username': configfile.readline().strip(),
+		'password': configfile.readline().strip()
+	})
+
+with requests.Session() as s:
+	s.headers.update({'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:51.0) Gecko/20100101 Firefox/51.0'})
+	page = s.get(url['login'])
+	soup = BeautifulSoup(page.text)
+	form = soup.find('form', attrs={'name':'login'})
+	postdata = {
+		'_csrfToken':	form.find('input', attrs={'name':'_csrfToken'})['value'],
+		'edited':	form.find('input', attrs={'name':'edited'})['value'],
+		'ref':		form.find('input', attrs={'name':'ref'})['value'],
+		'x':		'0',
+		'y':		'0'
+	}
+	postdata.update(login)
+	
+	s.headers.update({'Referer': 'https://www.sbroker.de/sbl/service/anmelden'})
+	page = s.post(url['login'], data=postdata)
+	
+	page = s.get(url['depot_e'])
+	soup = BeautifulSoup(page.text)
+	depots = []
+	for elem in soup.find('select', attrs={'name':'pId'}).find_all('option'):
+		try:
+			elem['selected']
+		except:
+			depots.append({'name':elem.string, 'id':elem['value']})
+		else:
+			depots.append({'name':elem.string, 'id':elem['value'], 'selected': True})
+	print(depots)
+	exit(0)
+
+
+	values = {
+		'value':	soup.find('span', string=parser['value']).parent.parent.find(string=re.compile('EUR')),
+		'buy_value':	soup.find('span', string=parser['buy_value']).parent.parent.find(string=re.compile('EUR')),
+		'delta_1d':	soup.find('span', string=parser['delta_1d']).parent.parent.find(string=re.compile('EUR'))
+	}
