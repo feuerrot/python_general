@@ -30,14 +30,12 @@ with open("{}/config".format(os.path.dirname(os.path.realpath(__file__))), 'r') 
 with requests.Session() as s:
 	s.headers.update({'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:51.0) Gecko/20100101 Firefox/51.0'})
 	page = s.get(url['login'])
-	soup = BeautifulSoup(page.text)
+	soup = BeautifulSoup(page.text, "html.parser")
 	form = soup.find('form', attrs={'name':'login'})
 	postdata = {
 		'_csrfToken':	form.find('input', attrs={'name':'_csrfToken'})['value'],
 		'edited':	form.find('input', attrs={'name':'edited'})['value'],
-		'ref':		form.find('input', attrs={'name':'ref'})['value'],
-		'x':		'0',
-		'y':		'0'
+		'ref':		form.find('input', attrs={'name':'ref'})['value']
 	}
 	postdata.update(login)
 	
@@ -45,7 +43,7 @@ with requests.Session() as s:
 	page = s.post(url['login'], data=postdata)
 	
 	page = s.get(url['depot_e'])
-	soup = BeautifulSoup(page.text)
+	soup = BeautifulSoup(page.text, "html.parser")
 	depots = []
 	for elem in soup.find('select', attrs={'name':'pId'}).find_all('option'):
 		try:
