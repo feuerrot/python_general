@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 from mpd import MPDClient
+import sys
+import traceback
 
 def getvolume(c):
-	return c.status()['volume']
+	return int(c.status()['volume'])
 
 client = MPDClient()
 client.timeout = 10
@@ -13,11 +15,19 @@ print(client.mpd_version)
 volume = getvolume(client)
 
 while True:
-	client.idle('mixer')
-	print(getvolume(client))
-	new_volume = getvolume(client)
-	if new_volume >= "100":
-		client.setvol(volume)
-	else:
-		volume = new_volume
-
+	try:
+		client.idle('mixer')
+		new_volume = getvolume(client)
+		sys.stdout.write(new_volume)
+		sys.stdout.flush()
+		if new_volume >= 100:
+			client.setvol(volume)
+		else:
+			volume = new_volume
+	except Exception:
+		sys.stderr.write("got an exception!")
+		sys.stderr.write("old volume: {}".format(volume))
+		sys.stderr.write("new volume: {}".format(new_volume))
+		sys.stderr.write(traceback.format_exc())
+		sys.stderr.flush()
+		exit(1)
