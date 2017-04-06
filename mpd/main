@@ -16,7 +16,7 @@ while True:
 	client.idle('mixer')
 	print(getvolume(client))
 	new_volume = getvolume(client)
-	if new_volume == "100":
+	if new_volume >= "100":
 		client.setvol(volume)
 	else:
 		volume = new_volume
