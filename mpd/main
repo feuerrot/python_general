@@ -18,16 +18,16 @@ while True:
 	try:
 		client.idle('mixer')
 		new_volume = getvolume(client)
-		sys.stdout.write(new_volume)
+		sys.stdout.write("{}\n".format(new_volume))
 		sys.stdout.flush()
 		if new_volume >= 100:
 			client.setvol(volume)
 		else:
 			volume = new_volume
 	except Exception:
-		sys.stderr.write("got an exception!")
-		sys.stderr.write("old volume: {}".format(volume))
-		sys.stderr.write("new volume: {}".format(new_volume))
+		sys.stderr.write("got an exception!\n")
+		sys.stderr.write("old volume: {}\n".format(volume))
+		sys.stderr.write("new volume: {}\n".format(new_volume))
 		sys.stderr.write(traceback.format_exc())
 		sys.stderr.flush()
 		exit(1)
