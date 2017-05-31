@@ -4,7 +4,10 @@ import sys
 import traceback
 
 def getvolume(c):
-	return int(c.status()['volume'])
+	v = int(c.status()['volume'])
+	if v < 0:
+		v = None
+	return v
 
 client = MPDClient()
 client.timeout = 10
@@ -20,7 +23,9 @@ while True:
 		new_volume = getvolume(client)
 		sys.stdout.write("{}\n".format(new_volume))
 		sys.stdout.flush()
-		if new_volume >= 100:
+		if new_volume == None:
+			sys.stdout.write("mpd currently not playing")
+		elif new_volume >= 100:
 			client.setvol(volume)
 		else:
 			volume = new_volume
