@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+import json
+import sys
+
+def export_urls(f):
+	j = json.load(f)
+	for w in j['windows']:
+		for t in w['tabs']:
+			for e in t['entries']:
+				print(e['url'])
+
+if len(sys.argv) == 1:
+	print("Argument?")
+
+try:
+	with open(sys.argv[1], 'r') as bfile:
+		export_urls(bfile)
+except Exception as e:
+	print(e)
